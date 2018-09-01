@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Joystick</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bluetooth_close_socket">Bluetooth socket can not be closed</string>
+    <string name="bluetooth_not_connected">Bluetooth connection can not be established"></string>
+    <string name="bluetooth_not_enabled">Bluetooth not enabled</string>
+    <string name="bluetooth_not_found">Bluetooth device not found</string>
+    <string name="bluetooth_not_supported">Bluetooth not supported</string>
+    <string name="devices">Devices</string>
+    <string name="discover">Discover</string>
+    <string name="discovery_ended">Discovery has ended</string>
+    <string name="discovery_started">Discovery has started</string>
+    <string name="distribution_power">Distribution Power:</string>
+    <string name="exception_message">An exception occurred</string>
+    <string name="fifty">50</string>
+    <string name="inner_circle">Inner circle</string>
+    <string name="mac_address">Mac Address</string>
+    <string name="name">Name</string>
+    <string name="not_implemented_yet">Not implemented yet</string>
+    <string name="outer_circle">Outer circle</string>
+    <string name="pos_x">Pos. X:</string>
+    <string name="pos_y">Pos. Y:</string>
+    <string name="setup">Setup</string>
+    <string name="slash">/</string>
+    <string name="mode">Mode</string>
+    <string name="implementation_exception">Listener not implemented</string>
+    <string name="not_bound">The device is not bounded. You may have issues.</string>
+</resources>
