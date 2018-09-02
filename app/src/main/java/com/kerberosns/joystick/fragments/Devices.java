@@ -29,11 +29,19 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+import static android.bluetooth.BluetoothDevice.EXTRA_DEVICE;
+
 public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
     /**
      * The button to discover devices once pressed.
      */
     private Button mDiscoverButton;
+
+    /**
+     * The request code for creating a new bond with a bluetooth device.
+     */
+    private static final int REQUEST_BOND = 0;
 
     /**
      * The callback methods the activity hosting this fragment must implement.
@@ -83,8 +91,32 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
 
     @Override
     public void onClick(BluetoothDevice device) {
-        endDiscovery();
-        mListener.onBluetoothDeviceSelected(device);
+        // The device is bounded already.
+        if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+            endDiscovery();
+            mListener.onBluetoothDeviceSelected(device);
+        } else {
+            createBond(device);
+        }
+    }
+
+    /**
+     * Initiate a dialog for the user to bound the device.
+     * @param device The bluetooth device to be paired with.
+     */
+    private void createBond(BluetoothDevice device) {
+        String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
+        Intent intent = new Intent(ACTION_PAIRING_REQUEST);
+        String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
+        intent.putExtra(EXTRA_DEVICE, device);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_BOND && resultCode == RESULT_OK) {
+            // create a new broadcast receiver.
+        }
     }
 
     /**
@@ -136,16 +168,18 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
                 if (action.equals(BluetoothDevice.ACTION_FOUND)) {
                     BluetoothDevice device;
                     device = intent.getParcelableExtra(
-                            BluetoothDevice.EXTRA_DEVICE);
+                            EXTRA_DEVICE);
 
                     if (device.getName() != null) {
                         addBluetoothDevice(device);
                     }
                 } else if (action.equals(BluetoothDevice.ACTION_NAME_CHANGED)) {
                     BluetoothDevice device = intent
-                            .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            .getParcelableExtra(EXTRA_DEVICE);
 
                     addBluetoothDevice(device);
+                } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                    mAdapter.notifyDataSetChanged();
                 }
             }
         }

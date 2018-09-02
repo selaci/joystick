@@ -3,6 +3,7 @@ package com.kerberosns.joystick.fragments;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,6 +26,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import static android.app.Activity.RESULT_OK;
+
 // TODO: The method "finishFragment" does not toast a message right now. Better to send a message
 // TODO: with the order "mActivity.onBackPressed();" a few seconds later. Otherwise it seems the
 // TODO: fragment terminates and the message can not be toasted because there is not context.
@@ -33,11 +36,19 @@ import java.util.UUID;
 // TODO: it seems the application stops responding or event crashes. This may happen because the
 // TODO: write channel is blocking once the buffer has been filled. This means I need to implement
 // TODO: an asynchronous writer. Most likely with handlers.
+//
+// TODO: If device is not bounded, then this fragment fails during "getBluetoothSocket" because
+// TODO: device is still null and trying to get the UUID generates a null pointer exception.
 public class Joystick extends Fragment {
     /**
      * A static string to use as key for a parcelable.
      */
     public static final String DEVICE = "device";
+
+    /**
+     * A constant to be used during an activityForResult.
+     */
+    public static final int REQUEST_CREATE_BOND = 0;
 
     /**
      * A static string to use as key for a parcelable.
@@ -154,21 +165,11 @@ public class Joystick extends Fragment {
         if (mode.equals(Mode.REAL.toString()) || mode.equals(Mode.TEST.toString())) {
             BluetoothDevice device = getArguments().getParcelable(DEVICE);
 
-            // TODO: Do I need to bound the device if not bounded yet?
-            // TODO: If device already bound then, no need to bound.
-            if (device.getBondState() == BluetoothDevice.BOND_NONE) {
-                if (Build.VERSION.SDK_INT >= 19) {
-                    device.createBond();
-                } else {
-                    String message = getStringResource(R.string.not_bound);
-                    toast(message);
-                }
-            }
-
             mSocket = getBluetoothSocket(device);
             mOutputStream = getOutputStream(mSocket);
         }
     }
+
 
     private void finishFragment(int stringResource) {
         String message = getStringResource(stringResource);
