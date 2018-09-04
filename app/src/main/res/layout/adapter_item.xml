@@ -36,6 +36,13 @@
             android:fontFamily="@font/roboto_medium"
             android:text="@string/mac_address" />
 
+        <TextView
+            android:id="@+id/tertiary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:text="@string/state" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

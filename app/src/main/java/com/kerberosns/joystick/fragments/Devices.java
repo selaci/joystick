@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +27,7 @@ import com.kerberosns.joystick.Adapter;
 import com.kerberosns.joystick.R;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,11 +107,21 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
      * @param device The bluetooth device to be paired with.
      */
     private void createBond(BluetoothDevice device) {
-        String ACTION_PAIRING_REQUEST = "android.bluetooth.device.action.PAIRING_REQUEST";
-        Intent intent = new Intent(ACTION_PAIRING_REQUEST);
-        String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
-        intent.putExtra(EXTRA_DEVICE, device);
-        startActivity(intent);
+        if (Build.VERSION.SDK_INT > 19) {
+            device.createBond();
+        } else {
+            try {
+                // TODO: This needs to be tested.
+                Class class1 = Class.forName("android.bluetooth.BluetoothDevice");
+                Method createBondMethod = class1.getMethod("createBond");
+                Boolean returnValue = (Boolean) createBondMethod.invoke(device);
+                returnValue.booleanValue();
+
+            } catch (Exception e) {
+                String message = getResources().getString(R.string.can_not_bound);
+                showMessageToUser(message);
+            }
+        }
     }
 
     @Override
@@ -230,6 +242,8 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
         // Register bluetooth broadcast message for bonding devices.
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothDevice.ACTION_NAME_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         getActivity().registerReceiver(mReceiver, filter);
     }
 
@@ -260,7 +274,7 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
         layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        mAdapter = new Adapter(mDevices, this);
+        mAdapter = new Adapter(mDevices, getResources(), this);
         recyclerView.setAdapter(mAdapter);
 
         mDiscoverButton = view.findViewById(R.id.discover);

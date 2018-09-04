@@ -2,6 +2,8 @@ package com.kerberosns.joystick;
 
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,24 +33,35 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     private final OnDeviceClickListener mListener;
 
     /**
+     * The application resources.
+     */
+    private final Resources mResources;
+
+    /**
      * The constructor.
      * @param devices The list of bluetooth devices.
+     * @param resources The application resources.
      * @param listener A listener to trigger when the user presses on a list
      *                 item.
      */
-    public Adapter(List<BluetoothDevice> devices, OnDeviceClickListener listener) {
+    public Adapter(List<BluetoothDevice> devices, Resources resources,
+                   OnDeviceClickListener listener) {
+
         mDevices = devices;
+        mResources = resources;
         mListener = listener;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView mPrimary;
         final TextView mSecondary;
+        final TextView mTertiary;
 
         ViewHolder(View view) {
             super(view);
             mPrimary = view.findViewById(R.id.primary);
             mSecondary = view.findViewById(R.id.secondary);
+            mTertiary = view.findViewById(R.id.tertiary);
         }
     }
 
@@ -75,6 +88,13 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
         text = device.getAddress();
         viewHolder.mSecondary.setText(text);
+
+        if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+            text = mResources.getString(R.string.state_not_bounded);
+        } else {
+            text = mResources.getString(R.string.state_bounded);
+        }
+        viewHolder.mTertiary.setText(text);
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

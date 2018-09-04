@@ -24,5 +24,9 @@
     <string name="slash">/</string>
     <string name="mode">Mode</string>
     <string name="implementation_exception">Listener not implemented</string>
-    <string name="not_bound">The device is not bounded. You may have issues.</string>
+    <string name="not_bounded">The device is not bounded. You may have issues.</string>
+    <string name="state_not_bounded">Not bounded</string>
+    <string name="state_bounded">Bounded</string>
+    <string name="state">state</string>
+    <string name="can_not_bound">Device can not be bound from this app</string>
 </resources>

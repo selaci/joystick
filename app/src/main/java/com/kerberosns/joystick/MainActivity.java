@@ -34,7 +34,9 @@ public class MainActivity extends AppCompatActivity implements
      */
     private DrawerLayout mDrawerLayout;
 
-    // Activity for result.
+    /**
+     * Activity for result.
+     */
     private final static int REQUEST_ENABLE_BLUETOOTH = 0;
 
     /**
