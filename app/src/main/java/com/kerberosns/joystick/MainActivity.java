@@ -22,7 +22,7 @@ import com.kerberosns.joystick.fragments.Joystick;
 import com.kerberosns.joystick.fragments.Settings;
 
 public class MainActivity extends AppCompatActivity implements
-        Devices.Listener, Settings.Listener {
+        Devices.Listener, Settings.Configurable {
 
     /**
      * A constant for debugging.
@@ -50,12 +50,37 @@ public class MainActivity extends AppCompatActivity implements
         startActivityForResult(intent, REQUEST_ENABLE_BLUETOOTH);
     }
 
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+
+        if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
+            if (resultCode != RESULT_OK) {
+                showMessageToUser(R.string.bluetooth_not_enabled);
+                finish();
+            } else {
+                Fragment fragment = Devices.newInstance();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            }
+        }
+    }
+
+    private void showMessageToUser(int resource) {
+        String message = getResources().getString(resource);
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFinish() {
+        finish();
+    }
+
     @Override
     public void onBluetoothDeviceSelected(BluetoothDevice device) {
+
         Fragment fragment = Joystick.newInstance();
         Bundle bundle = new Bundle();
         bundle.putParcelable(Joystick.DEVICE, device);
-        bundle.putString(Joystick.MODE, mMode);
         fragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction()
@@ -64,18 +89,10 @@ public class MainActivity extends AppCompatActivity implements
                 .commit();
     }
 
+
     @Override
     public void onModeSelected(String mode) {
         mMode = mode;
-    }
-
-    @Override
-    public void onFinish() {
-        finish();
-    }
-
-    private void showMessageToUser(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -153,20 +170,5 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data) {
-
-        if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
-            if (resultCode != RESULT_OK) {
-                showMessageToUser(getResources().getString(R.string.bluetooth_not_enabled));
-                finish();
-            } else {
-                Fragment fragment = Devices.newInstance();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-            }
-        }
     }
 }

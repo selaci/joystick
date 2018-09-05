@@ -1,9 +1,11 @@
 package com.kerberosns.joystick.fragments;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,22 +18,26 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.kerberosns.joystick.Adapter;
+import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import static android.app.Activity.RESULT_OK;
 import static android.bluetooth.BluetoothDevice.EXTRA_DEVICE;
 
 public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
@@ -39,11 +45,6 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
      * The button to discover devices once pressed.
      */
     private Button mDiscoverButton;
-
-    /**
-     * The request code for creating a new bond with a bluetooth device.
-     */
-    private static final int REQUEST_BOND = 0;
 
     /**
      * The callback methods the activity hosting this fragment must implement.
@@ -92,10 +93,10 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
     private Listener mListener;
 
     @Override
-    public void onClick(BluetoothDevice device) {
+    public void onClick(final BluetoothDevice device) {
         // The device is bounded already.
+        endDiscovery();
         if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-            endDiscovery();
             mListener.onBluetoothDeviceSelected(device);
         } else {
             createBond(device);
@@ -114,20 +115,11 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
                 // TODO: This needs to be tested.
                 Class class1 = Class.forName("android.bluetooth.BluetoothDevice");
                 Method createBondMethod = class1.getMethod("createBond");
-                Boolean returnValue = (Boolean) createBondMethod.invoke(device);
-                returnValue.booleanValue();
-
+                createBondMethod.invoke(device);
             } catch (Exception e) {
                 String message = getResources().getString(R.string.can_not_bound);
                 showMessageToUser(message);
             }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_BOND && resultCode == RESULT_OK) {
-            // create a new broadcast receiver.
         }
     }
 

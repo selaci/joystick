@@ -1,6 +1,7 @@
 package com.kerberosns.joystick.fragments;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,15 @@ import android.widget.Spinner;
 import com.kerberosns.joystick.R;
 
 public class Settings extends Fragment {
+    /**
+     * All configurable actions that the calling activity needs to implement.
+     */
+    public interface Configurable {
+        /**
+         * When the user selects a specific mode.
+         */
+        void onModeSelected(String mode);
+    }
 
     /**
      * Factory method constructor.
@@ -23,17 +33,13 @@ public class Settings extends Fragment {
         return new Settings();
     }
 
-    private Listener mListener;
-
-    public interface Listener {
-        void onModeSelected(String mode);
-    }
+    private Configurable mListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof Listener) {
-            mListener = (Listener) context;
+        if (context instanceof Configurable) {
+            mListener = (Configurable) context;
         } else {
             String message = getResources().getString(R.string.implementation_exception);
             throw new ClassCastException(message);

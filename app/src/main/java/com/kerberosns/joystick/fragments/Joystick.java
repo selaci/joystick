@@ -1,10 +1,10 @@
 package com.kerberosns.joystick.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -20,13 +20,10 @@ import android.widget.Toast;
 
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
-import com.kerberosns.joystick.data.Mode;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
-
-import static android.app.Activity.RESULT_OK;
 
 // TODO: The method "finishFragment" does not toast a message right now. Better to send a message
 // TODO: with the order "mActivity.onBackPressed();" a few seconds later. Otherwise it seems the
@@ -46,19 +43,14 @@ public class Joystick extends Fragment {
     public static final String DEVICE = "device";
 
     /**
-     * A constant to be used during an activityForResult.
-     */
-    public static final int REQUEST_CREATE_BOND = 0;
-
-    /**
-     * A static string to use as key for a parcelable.
-     */
-    public static final String MODE = "mode";
-
-    /**
      * The activity this fragment is attached to.
      */
     private Activity mActivity;
+
+    /**
+     * The bluetooth device the user has selected.
+     */
+    private BluetoothDevice mDevice;
 
     /**
      * The bluetooth socket that lets you communicate with the device.
@@ -161,19 +153,15 @@ public class Joystick extends Fragment {
 
         mActivity = getActivity();
 
-        String mode = getArguments().getString(MODE);
-        if (mode.equals(Mode.REAL.toString()) || mode.equals(Mode.TEST.toString())) {
-            BluetoothDevice device = getArguments().getParcelable(DEVICE);
-
-            mSocket = getBluetoothSocket(device);
-            mOutputStream = getOutputStream(mSocket);
+        if (getArguments() != null) {
+            mDevice = getArguments().getParcelable(DEVICE);
+        } else {
+            finishFragment(R.string.bluetooth_not_found);
         }
     }
 
-
     private void finishFragment(int stringResource) {
-        String message = getStringResource(stringResource);
-        toast(message);
+        toast(stringResource);
         closeSocket();
         mActivity.onBackPressed();
     }
@@ -263,36 +251,64 @@ public class Joystick extends Fragment {
         return view;
     }
 
-    private BluetoothSocket getBluetoothSocket(BluetoothDevice device) {
-        UUID uuid = device.getUuids()[0].getUuid();
-        BluetoothSocket socket = null;
-        try {
-            socket = device.createRfcommSocketToServiceRecord(uuid);
-            socket.connect();
-        } catch (IOException e) {
-            finishFragment(R.string.bluetooth_not_connected);
-        }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        return socket;
+        new ConnectToDeviceTask().execute(mDevice);
     }
 
-    private OutputStream getOutputStream(BluetoothSocket socket) {
-        OutputStream outputStream = null;
-        try {
-            outputStream = socket.getOutputStream();
-        } catch (IOException e) {
-            finishFragment(R.string.bluetooth_not_connected);
+    class ConnectToDeviceTask extends AsyncTask<BluetoothDevice, Void, BluetoothSocket> {
+        private ProgressDialog mmDialog;
+
+        @Override
+        protected void onPreExecute() {
+            mmDialog = new ProgressDialog(mActivity);
+            mmDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mmDialog.setMessage("Connecting");
+            mmDialog.setIndeterminate(true);
+            mmDialog.show();
         }
 
-        return outputStream;
+        @Override
+        protected BluetoothSocket doInBackground(BluetoothDevice... devices) {
+            UUID uuid = devices[0].getUuids()[0].getUuid();
+            BluetoothSocket socket = null;
+            try {
+                socket = devices[0].createRfcommSocketToServiceRecord(uuid);
+                socket.connect();
+            } catch (IOException e) {
+                // Ignore this exception, but post execute will deal with this scenario.
+                Log.i(MainActivity.TAG, "exceptionnnnnn");
+            }
+
+            return socket;
+        }
+
+        @Override
+        protected void onPostExecute(BluetoothSocket socket) {
+            mmDialog.dismiss();
+
+            if (socket.isConnected()) {
+                mSocket = socket;
+                try {
+                    mOutputStream = mSocket.getOutputStream();
+                } catch (IOException e) {
+                    finishFragment(R.string.bluetooth_not_connected);
+                }
+            } else {
+                finishFragment(R.string.bluetooth_not_connected);
+            }
+        }
     }
 
     /**
      * Toast a message for the user.
-     * @param message The message to be toasted.
+     * @param resource The string resource ID.
      */
-    private void toast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+    private void toast(int resource) {
+        String message = mActivity.getResources().getString(resource);
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     /**
