@@ -15,11 +15,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
+import com.kerberosns.joystick.data.Mode;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -41,6 +43,8 @@ public class Joystick extends Fragment {
      * A static string to use as key for a parcelable.
      */
     public static final String DEVICE = "device";
+
+    public static final String MODE = "mode";
 
     /**
      * The activity this fragment is attached to.
@@ -128,6 +132,14 @@ public class Joystick extends Fragment {
     private static final int FOURTH_QUADRANT = 3;
 
     /**
+     * An integer that determines how much the power to the left and right motors needs to be
+     * amended. It's ranged between 0 and 100. As an idea:
+     */
+    private int mBalance;
+
+    private Mode mMode;
+
+    /**
      * During tests, I found Android can send enough messages for the bluetooth channel to saturate.
      * This occurs because for every single pixel change, the application sends a message and if the
      * other end does not read them fast enough then, the write channel saturates and the
@@ -155,6 +167,7 @@ public class Joystick extends Fragment {
 
         if (getArguments() != null) {
             mDevice = getArguments().getParcelable(DEVICE);
+            mMode = Mode.valueOf(getArguments().getString(MODE));
         } else {
             finishFragment(R.string.bluetooth_not_found);
         }
@@ -167,6 +180,8 @@ public class Joystick extends Fragment {
     }
 
     private void closeSocket() {
+        if (isDevelopment()) { return; }
+
         try {
             if (mSocket != null) {
                 mSocket.close();
@@ -175,6 +190,10 @@ public class Joystick extends Fragment {
             String message = getStringResource(R.string.bluetooth_close_socket);
             Log.e(MainActivity.TAG, message);
         }
+    }
+
+    private boolean isDevelopment() {
+        return mMode.toString().equals(Mode.DEVELOPMENT.toString());
     }
 
     @SuppressWarnings("ClickableViewAccessibility")
@@ -235,7 +254,8 @@ public class Joystick extends Fragment {
                 }
 
                 float[] coordinates = moveInnerCircle(x, y);
-                int[] values = mapValues(coordinates[0], coordinates[1]);
+                int[] values = mapValues(coordinates[0], coordinates[1], mBalance);
+
                 setTextViewsPositions(values[0], values[1]);
 
                 if (newValuesDifferEnoughFromPrevious(values)) {
@@ -248,12 +268,56 @@ public class Joystick extends Fragment {
 
         setTextViewsPositions(512, 512);
 
+        // Balance.
+        final TextView indicator = view.findViewById(R.id.balanceIndicator);
+
+        SeekBar balance = view.findViewById(R.id.balance);
+        mBalance = balance.getProgress();
+
+        balance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mBalance = i;
+                String left = String.valueOf(i);
+                String right = String.valueOf(100 -i);
+
+                String text = formatTextBalance(left, right);
+                indicator.setText(text);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Nothing.
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Nothing.
+            }
+        });
+
+        view.findViewById(R.id.sequence).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeSequence();
+            }
+        });
         return view;
+    }
+
+    private String formatTextBalance(String left, String right) {
+        return String.format("%1$" + (4 - left.length()) +"s", "")
+                + left
+                + " / "
+                + String.format("%1$" + (4 - right.length()) +"s", "")
+                + right;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (isDevelopment()) { return; }
 
         new ConnectToDeviceTask().execute(mDevice);
     }
@@ -279,7 +343,7 @@ public class Joystick extends Fragment {
                 socket.connect();
             } catch (IOException e) {
                 // Ignore this exception, but post execute will deal with this scenario.
-                Log.i(MainActivity.TAG, "exceptionnnnnn");
+                Log.i(MainActivity.TAG, "exception");
             }
 
             return socket;
@@ -426,12 +490,22 @@ public class Joystick extends Fragment {
     }
 
     /**
-     * Sends a command to the bluetooth device.
+     * Sends a command to the bluetooth device. It also modifies the x axis, based on the balance.
      */
-    private int[] mapValues(double x, double y) {
-        return new int[]{
+    private int[] mapValues(double x, double y, int balance) {
+        int[] values = new int[]{
                 map((int) x, mMinX, mMaxX, 0, 1024),
                 map((int) y, mMinY, mMaxY, 1024, 0)};
+
+        values[0] = values[0] - 400 + 8 * balance;
+
+        if (values[0] < 0) {
+            values[0] = 0;
+        } else if (values[0] > 1023) {
+            values[0] = 1023;
+        }
+
+        return values;
     }
 
     /**
@@ -463,6 +537,8 @@ public class Joystick extends Fragment {
     }
 
     private void write(String message) {
+        if (isDevelopment()) { return; }
+
         try {
             mOutputStream.write(message.getBytes());
         } catch (IOException e) {
@@ -470,5 +546,9 @@ public class Joystick extends Fragment {
         } catch (NullPointerException e) {
             finishFragment(R.string.bluetooth_not_connected);
         }
+    }
+
+    private void changeSequence() {
+        write("^CHANGE_SEQUENCE$");
     }
 }

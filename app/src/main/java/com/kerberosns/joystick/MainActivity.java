@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Default mode value.
      */
-    private String mMode = Mode.REAL.name();
+    private Mode mMode = Mode.REAL;
 
     @Override
     public void onRequestEnableBluetooth() {
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements
         Fragment fragment = Joystick.newInstance();
         Bundle bundle = new Bundle();
         bundle.putParcelable(Joystick.DEVICE, device);
+        bundle.putString(Joystick.MODE, mMode.toString());
         fragment.setArguments(bundle);
 
         getSupportFragmentManager().beginTransaction()
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onModeSelected(String mode) {
+    public void onModeSelected(Mode mode) {
         mMode = mode;
     }
 

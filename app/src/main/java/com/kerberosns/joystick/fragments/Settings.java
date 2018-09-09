@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.kerberosns.joystick.R;
+import com.kerberosns.joystick.data.Mode;
 
 public class Settings extends Fragment {
     /**
@@ -22,7 +23,7 @@ public class Settings extends Fragment {
         /**
          * When the user selects a specific mode.
          */
-        void onModeSelected(String mode);
+        void onModeSelected(Mode mode);
     }
 
     /**
@@ -64,8 +65,8 @@ public class Settings extends Fragment {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String mode = (String) adapterView.getItemAtPosition(i);
-                mListener.onModeSelected(mode);
+                String name = (String) adapterView.getItemAtPosition(i);
+                mListener.onModeSelected(Mode.valueOf(name));
             }
 
             @Override
