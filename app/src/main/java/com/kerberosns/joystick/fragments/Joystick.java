@@ -25,11 +25,13 @@ import android.widget.Toast;
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
 import com.kerberosns.joystick.bluetooth.Reader;
+import com.kerberosns.joystick.data.Encoder;
 import com.kerberosns.joystick.data.Mode;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.UUID;
 
 // TODO: The method "finishFragment" does not toast a message right now. Better to send a message
@@ -179,6 +181,11 @@ public class Joystick extends Fragment {
 
     private TextView mTextReader;
 
+    /**
+     * It encodes commands into bytes that can be transmitted over the serial channel.
+     */
+    private Encoder mEncoder;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,6 +198,8 @@ public class Joystick extends Fragment {
         } else {
             finishFragment(R.string.bluetooth_not_found);
         }
+
+        mEncoder = new Encoder();
     }
 
     private void finishFragment(int stringResource) {
@@ -280,7 +289,7 @@ public class Joystick extends Fragment {
 
                 if (newValuesDifferEnoughFromPrevious(values)) {
                     lastEffectiveCoordinate = values;
-                    commandDevice(values[0], values[1]);
+                    sendMoveCommand(values[0], values[1]);
                 }
                 return true;
             }
@@ -558,16 +567,20 @@ public class Joystick extends Fragment {
      * @param x The coordinate X.
      * @param y The coordinate Y.
      */
-    private void commandDevice(int x, int y) {
-        write("^M:" + x + "," + y + "$");
+    private void sendMoveCommand(int x, int y) {
+        int[] array = mEncoder.move(x, y);
+        write(array);
     }
 
-    private void write(String message) {
+    private void write(int[] array) {
         if (isDevelopment()) { return; }
 
         try {
-            Log.d(MainActivity.TAG, "Sent command: " + message);
-            mOutputStream.write(message.getBytes());
+            Log.d(MainActivity.TAG, "Sent command: " + Arrays.toString(array));
+
+            for (int number : array) {
+                mOutputStream.write(number);
+            }
         } catch (IOException e) {
             finishFragment(R.string.bluetooth_not_connected);
         } catch (NullPointerException e) {
@@ -576,6 +589,7 @@ public class Joystick extends Fragment {
     }
 
     private void changeSequence() {
-        write("^CHANGE_SEQUENCE$");
+        int[] array = mEncoder.changeLedSequence();
+        write(array);
     }
 }
