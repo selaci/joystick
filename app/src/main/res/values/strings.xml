@@ -33,4 +33,5 @@
     <string name="loading">Loading</string>
     <string name="fifty_fifty">50 / 50</string>
     <string name="sequence">Sequence</string>
+    <string name="debug">Debug</string>
 </resources>

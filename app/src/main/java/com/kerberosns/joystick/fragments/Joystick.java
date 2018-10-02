@@ -6,6 +6,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -21,21 +24,18 @@ import android.widget.Toast;
 
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
+import com.kerberosns.joystick.bluetooth.Reader;
 import com.kerberosns.joystick.data.Mode;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
 // TODO: The method "finishFragment" does not toast a message right now. Better to send a message
 // TODO: with the order "mActivity.onBackPressed();" a few seconds later. Otherwise it seems the
 // TODO: fragment terminates and the message can not be toasted because there is not context.
-//
-// TODO: The bluetooth device may get saturated when this application writes. If this ever happens
-// TODO: it seems the application stops responding or event crashes. This may happen because the
-// TODO: write channel is blocking once the buffer has been filled. This means I need to implement
-// TODO: an asynchronous writer. Most likely with handlers.
-//
+
 // TODO: If device is not bounded, then this fragment fails during "getBluetoothSocket" because
 // TODO: device is still null and trying to get the UUID generates a null pointer exception.
 public class Joystick extends Fragment {
@@ -158,6 +158,26 @@ public class Joystick extends Fragment {
     public static Joystick newInstance() {
         return new Joystick();
     }
+
+    public interface Messages {
+        /**
+         * Signal that a message needs to be read.
+         */
+        int READ = 0;
+    }
+
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message message) {
+            switch(message.what) {
+                case Messages.READ:
+                    mTextReader.setText((String) message.obj);
+                    break;
+            }
+        }
+    };
+
+    private TextView mTextReader;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -302,6 +322,9 @@ public class Joystick extends Fragment {
                 changeSequence();
             }
         });
+
+        mTextReader = view.findViewById(R.id.textViewReader);
+
         return view;
     }
 
@@ -357,6 +380,9 @@ public class Joystick extends Fragment {
                 mSocket = socket;
                 try {
                     mOutputStream = mSocket.getOutputStream();
+                    InputStream inputStream = mSocket.getInputStream();
+                    new Reader('^', '$', inputStream, mHandler).start();
+
                 } catch (IOException e) {
                     finishFragment(R.string.bluetooth_not_connected);
                 }
@@ -533,13 +559,14 @@ public class Joystick extends Fragment {
      * @param y The coordinate Y.
      */
     private void commandDevice(int x, int y) {
-        write("^MOVEMENT:" + x + "," + y + "$");
+        write("^M:" + x + "," + y + "$");
     }
 
     private void write(String message) {
         if (isDevelopment()) { return; }
 
         try {
+            Log.d(MainActivity.TAG, "Sent command: " + message);
             mOutputStream.write(message.getBytes());
         } catch (IOException e) {
             finishFragment(R.string.bluetooth_not_connected);
