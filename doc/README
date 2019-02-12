@@ -1,8 +1,0 @@
-An application to control a toy car remotely. This car uses an Arduino.
-The application has at this moment, 2018/07/28, three main screens:
-
-* List devices. This is a screen that lets the user discover bluetooth devices and connect to them.
-* Joystick. Once connected to a device. This is a screen lets the user control the car.
-* Settings. This is a screen that lets the user configure some settings. Like the language.
-
-TODO: Add broadcast receiver for bluetooth disablement. User should not be able to interact.

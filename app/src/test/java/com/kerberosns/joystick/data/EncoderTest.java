@@ -8,36 +8,32 @@ public class EncoderTest {
     @Test
     public void changeLedSequence() {
         Encoder encoder = new Encoder();
-        int[] array = encoder.changeLedSequence();
+        byte encoded = encoder.changeLedSequence();
 
-        assertEquals(0b01011110, array[0]);
-        assertEquals(0b00010000, array[1]);
-        assertEquals(0b00100100, array[2]);
+        assertEquals(0b00000000, encoded);
     }
 
     @Test
-    public void moveTest421and724() {
+    public void moveTest_3_and_0() {
         Encoder encoder = new Encoder();
-        int[] actual = encoder.move(421, 724);
+        byte encoded = encoder.move(3, 0);
 
-        assertEquals(0b01011110, actual[0]);
-        assertEquals(0b00100110, actual[1]);
-        assertEquals(0b10010110, actual[2]);
-        assertEquals(0b11010100, actual[3]);
-        assertEquals(0b00100100, actual[4]);
+        assertEquals(0b01011000, encoded);
     }
 
     @Test
-    public void moveTestWithMarkers1001and3() {
-        Encoder encoder = new Encoder('a', 'z');
-        // a = 01100001
-        // z = 01111010
-        int[] actual = encoder.move(1001, 3);
+    public void moveTest_7_and_0() {
+        Encoder encoder = new Encoder();
+        byte encoded = encoder.move(7, 0);
 
-        assertEquals(0b01100001, actual[0]);
-        assertEquals(0b00101111, actual[1]);
-        assertEquals(0b10100100, actual[2]);
-        assertEquals(0b00000011, actual[3]);
-        assertEquals(0b01111010, actual[4]);
+        assertEquals(0b01111000, encoded);
+    }
+
+    @Test
+    public void moveTest_0_and_2() {
+        Encoder encoder = new Encoder();
+        byte encoded = encoder.move(0, 2);
+
+        assertEquals(0b01000010, encoded);
     }
 }

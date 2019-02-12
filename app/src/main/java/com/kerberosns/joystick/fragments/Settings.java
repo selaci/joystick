@@ -1,7 +1,6 @@
 package com.kerberosns.joystick.fragments;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -12,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
 import com.kerberosns.joystick.data.Mode;
 
@@ -74,6 +74,19 @@ public class Settings extends Fragment {
 
             }
         });
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            String mode = bundle.getString(MainActivity.MODE);
+            if (mode != null) {
+                if (mode.equals(Mode.REAL.toString())) {
+                    spinner.setSelection(0);
+                } else {
+                    spinner.setSelection(1);
+                }
+            }
+        }
+
         return view;
     }
 }

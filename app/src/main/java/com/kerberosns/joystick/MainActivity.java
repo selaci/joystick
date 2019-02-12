@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import com.kerberosns.joystick.data.Mode;
 import com.kerberosns.joystick.fragments.Devices;
-import com.kerberosns.joystick.fragments.Joystick;
 import com.kerberosns.joystick.fragments.Settings;
 
 public class MainActivity extends AppCompatActivity implements
@@ -28,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements
      * A constant for debugging.
      */
     public static final String TAG = "JOYSTICK";
+
+    public static final String MODE = "mode";
 
     /**
      * The drawer layout.
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements
      * Default mode value.
      */
     private Mode mMode = Mode.REAL;
+
+    /** The static key for passing a bluetooth device between activities. */
+    public static final String BLUETOOTH = "bluetooth";
 
     @Override
     public void onRequestEnableBluetooth() {
@@ -77,17 +81,15 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onBluetoothDeviceSelected(BluetoothDevice device) {
+        Intent intent;
+        if (mMode.equals(Mode.TEST)) {
+            intent = new Intent(getBaseContext(), TestJoystick.class);
+        } else {
+            intent = new Intent(getBaseContext(), RealJoystick.class);
+            intent.putExtra(MainActivity.BLUETOOTH, device);
+        }
 
-        Fragment fragment = Joystick.newInstance();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(Joystick.DEVICE, device);
-        bundle.putString(Joystick.MODE, mMode.toString());
-        fragment.setArguments(bundle);
-
-        getSupportFragmentManager().beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.content_frame, fragment, null)
-                .commit();
+        startActivity(intent);
     }
 
 
@@ -146,6 +148,9 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.nav_setup:
                 fragment = Settings.newInstance();
+                Bundle bundle = new Bundle();
+                bundle.putString(MODE, mMode.toString());
+                fragment.setArguments(bundle);
                 break;
             default:
                 fragment = Devices.newInstance();

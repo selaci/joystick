@@ -1,0 +1,41 @@
+# Clear channel.
+
+When the bluetooth channel starts. There seems to be left overs. It may be static when powering up
+the Arduino. Sending a few 0x00 to change the LED sequence or anything that is discarded by the
+processing code in the Arduino seems to clear the channel. From that moment on, it all works.
+
+- Implemented, but does not fix the problem. See next issue.
+
+# Start rotating to the left.
+
+I may have a bug somewhere. It seems clearing the channel is not everything. At the first command,
+if I press at some point, instead of dragging the joystick and immediately release, sometimes the
+car keeps spinning.
+
+# Power distribution.
+
+Some of the motors perform better than the other. I would like to implement, as part of the settings,
+a seek bar to configure more power to be set on the less performance motor.
+
+# Spinner (drop-down list) in settings and style
+
+The spinner looks just terrible. According to material design it should look different.
+
+# ConnectToDeviceTask needs to be static
+
+I may have a memory leak. Inner classes may always have memory leaks if not handled properly.
+
+# Screen orientation
+
+When the landscape mode is set, I do not save the state. Which makes the activity try to connect
+to the bluetooth device again. Since it already is connected, the attempt fails and closes the
+activity.
+
+- Implemented.
+
+# Attempts to reconnect to bluetooth device
+
+If you are in the joystick activity and press back, you go back to the list of devices. If you click
+on the device again, it does not re-connect. It keeps spinning and spinning.
+
+- Implemented

@@ -3,6 +3,5 @@
     <string-array name="modes">
         <item>REAL</item>
         <item>TEST</item>
-        <item>DEVELOPMENT</item>
     </string-array>
 </resources>

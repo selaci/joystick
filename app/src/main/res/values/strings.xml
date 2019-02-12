@@ -34,4 +34,8 @@
     <string name="fifty_fifty">50 / 50</string>
     <string name="sequence">Sequence</string>
     <string name="debug">Debug</string>
+    <string name="vertical_axis">Vertical axis</string>
+    <string name="horizontal_axis">Horizontal joystick</string>
+    <string name="joystick">joystick</string>
+    <string name="change_sequence">Change Sequence</string>
 </resources>
