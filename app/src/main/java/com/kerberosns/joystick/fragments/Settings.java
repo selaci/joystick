@@ -9,7 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
@@ -24,6 +26,12 @@ public class Settings extends Fragment {
          * When the user selects a specific mode.
          */
         void onModeSelected(Mode mode);
+
+        /**
+         * When the user drags the seek bar.
+         * @param progress The current progress selection.
+         */
+        void onDistributionChanged(int progress);
     }
 
     /**
@@ -36,6 +44,9 @@ public class Settings extends Fragment {
 
     private Configurable mListener;
 
+    /** Activity's context. */
+    private Context mContext;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -45,6 +56,8 @@ public class Settings extends Fragment {
             String message = getResources().getString(R.string.implementation_exception);
             throw new ClassCastException(message);
         }
+
+        mContext = context;
     }
 
     @Override
@@ -54,13 +67,14 @@ public class Settings extends Fragment {
         View view = inflater.inflate(R.layout.settings, container, false);
 
         Spinner spinner = view.findViewById(R.id.modes);
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter
                 .createFromResource(
-                        getActivity().getApplicationContext(),
+                        mContext,
                         R.array.modes,
-                        android.R.layout.simple_spinner_item);
+                        R.layout.simple_spinner_item);
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -87,6 +101,56 @@ public class Settings extends Fragment {
             }
         }
 
+        final TextView distribution = view.findViewById(R.id.distributionTextView);
+
+        SeekBar seekBar = view.findViewById(R.id.distributionSeekBar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mListener.onDistributionChanged(progress);
+                updateDistributionTextView(distribution, progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mListener.onDistributionChanged(seekBar.getProgress());
+                updateDistributionTextView(distribution, seekBar.getProgress());
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
         return view;
+    }
+
+    private void updateDistributionTextView(TextView distribution, int progress) {
+        String left = Integer.toString(150 - progress);
+        String right = Integer.toString(50 + progress);
+
+        String text;
+
+        int length = left.length();
+
+        if (length == 1) {
+            text = "  " + left;
+        } else if (length == 2) {
+            text = " " + left;
+        } else {
+            text = left;
+        }
+
+        text += " / ";
+        length = right.length();
+
+        if (length == 1) {
+            text += "   " + right;
+        } else if (length == 2) {
+            text += "  " + right;
+        } else {
+            text += right;
+        }
+
+        distribution.setText(text);
     }
 }

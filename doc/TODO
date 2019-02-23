@@ -1,10 +1,9 @@
 # Clear channel.
 
-When the bluetooth channel starts. There seems to be left overs. It may be static when powering up
-the Arduino. Sending a few 0x00 to change the LED sequence or anything that is discarded by the
-processing code in the Arduino seems to clear the channel. From that moment on, it all works.
+This may be a bug in the code, caused by the initialization of certain variables at "-1".
+They should be "-3".
 
-- Implemented, but does not fix the problem. See next issue.
+- Implemented, but not tested.
 
 # Start rotating to the left.
 
@@ -17,6 +16,8 @@ car keeps spinning.
 Some of the motors perform better than the other. I would like to implement, as part of the settings,
 a seek bar to configure more power to be set on the less performance motor.
 
+- Implemented, but the right motor only ranges from 0 to 63.
+
 # Spinner (drop-down list) in settings and style
 
 The spinner looks just terrible. According to material design it should look different.
@@ -24,6 +25,14 @@ The spinner looks just terrible. According to material design it should look dif
 # ConnectToDeviceTask needs to be static
 
 I may have a memory leak. Inner classes may always have memory leaks if not handled properly.
+
+# MainActivity style seems to change when rotating.
+
+The list fragment seems to change the style when the screen changes from portrait to landscape.
+
+# Settings , the state is not persisted during screen configuration changes
+
+I need to persist state information during screen orientation changes.
 
 # Screen orientation
 

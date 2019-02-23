@@ -29,4 +29,8 @@ public class Encoder {
         byte _horizontal = (byte) (horizontal & 0x07);
         return (byte) (0x40 | _vertical | _horizontal);
     }
+
+    public byte setMotorDistribution(int distribution) {
+        return (byte) (0x80 | distribution);
+    }
 }

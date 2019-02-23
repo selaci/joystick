@@ -1,6 +1,7 @@
 package com.kerberosns.joystick;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +9,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.kerberosns.joystick.data.Allocator;
 import com.kerberosns.joystick.data.Encoder;
@@ -66,11 +66,14 @@ public abstract class Joystick extends AppCompatActivity {
      * in the past, if so then, I don't send the command.
      *
      * The main reason behind this is to avoid buffer saturation. */
-    private byte mSavedHorizontalBlockNumber = -1;
-    private byte mSavedVerticalBlockNumber = -1;
+    private byte mSavedHorizontalBlockNumber = 3;
+    private byte mSavedVerticalBlockNumber = 3;
 
     /** Save the state of the horizontal joystick. */
     private boolean mHorizontalJoystickPressed = false;
+
+    /** The current motor distribution. */
+    private int mDistribution;
 
     /** It encodes commands into bytes that can be transmitted over the serial channel. */
     private Encoder mEncoder = new Encoder();
@@ -212,7 +215,22 @@ public abstract class Joystick extends AppCompatActivity {
                 changeSequence();
             }
         });
+
+        if (savedInstanceState != null) {
+            mDistribution = savedInstanceState.getInt(MainActivity.DISTRIBUTION);
+        } else {
+            Intent intent = getIntent();
+            mDistribution = intent.getIntExtra(MainActivity.DISTRIBUTION, 50);
+        }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(MainActivity.DISTRIBUTION, mDistribution);
+    }
+
 
     /**
      * Sends a command to change the LED sequence.
@@ -266,5 +284,10 @@ public abstract class Joystick extends AppCompatActivity {
      */
     private void restoreVerticalMovement() {
         sendMoveCommand(mNeutral, mSavedVerticalBlockNumber);
+    }
+
+    protected void setMotorDistribution() {
+        byte encoded = mEncoder.setMotorDistribution(mDistribution);
+        write(encoded);
     }
 }

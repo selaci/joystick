@@ -128,7 +128,7 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
      * A handler to deliver messages to this fragment.
      */
     private static class MyHandler extends Handler {
-        private WeakReference<Devices> mDevices;
+        private final WeakReference<Devices> mDevices;
 
         MyHandler(Devices devices) {
             mDevices = new WeakReference<>(devices);
@@ -162,21 +162,27 @@ public class Devices extends Fragment implements Adapter.OnDeviceClickListener {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action != null) {
-                if (action.equals(BluetoothDevice.ACTION_FOUND)) {
-                    BluetoothDevice device;
-                    device = intent.getParcelableExtra(
-                            EXTRA_DEVICE);
+                switch (action) {
+                    case BluetoothDevice.ACTION_FOUND: {
+                        BluetoothDevice device;
+                        device = intent.getParcelableExtra(
+                                EXTRA_DEVICE);
 
-                    if (device.getName() != null) {
-                        addBluetoothDevice(device);
+                        if (device.getName() != null) {
+                            addBluetoothDevice(device);
+                        }
+                        break;
                     }
-                } else if (action.equals(BluetoothDevice.ACTION_NAME_CHANGED)) {
-                    BluetoothDevice device = intent
-                            .getParcelableExtra(EXTRA_DEVICE);
+                    case BluetoothDevice.ACTION_NAME_CHANGED: {
+                        BluetoothDevice device = intent
+                                .getParcelableExtra(EXTRA_DEVICE);
 
-                    addBluetoothDevice(device);
-                } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                    mAdapter.notifyDataSetChanged();
+                        addBluetoothDevice(device);
+                        break;
+                    }
+                    case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
+                        mAdapter.notifyDataSetChanged();
+                        break;
                 }
             }
         }

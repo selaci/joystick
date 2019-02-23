@@ -38,4 +38,11 @@
     <string name="horizontal_axis">Horizontal joystick</string>
     <string name="joystick">joystick</string>
     <string name="change_sequence">Change Sequence</string>
+    <string name="settings">Settings</string>
+    <string name="item">Item</string>
+    <string name="spinner">Spinner</string>
+    <string name="power">Power</string>
+    <string name="balanced">100 / 100</string>
+
+    <string name="mode_primary">Development Mode</string>
 </resources>

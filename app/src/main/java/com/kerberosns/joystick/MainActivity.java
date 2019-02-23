@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String TAG = "JOYSTICK";
 
     public static final String MODE = "mode";
+    public static final String DISTRIBUTION = "distribution";
 
     /**
      * The drawer layout.
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements
      * Default mode value.
      */
     private Mode mMode = Mode.REAL;
+
+    /** The current power distribution. */
+    private int mDistribution = 50;
 
     /** The static key for passing a bluetooth device between activities. */
     public static final String BLUETOOTH = "bluetooth";
@@ -86,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements
             intent = new Intent(getBaseContext(), TestJoystick.class);
         } else {
             intent = new Intent(getBaseContext(), RealJoystick.class);
-            intent.putExtra(MainActivity.BLUETOOTH, device);
+            intent.putExtra(BLUETOOTH, device);
+            intent.putExtra(DISTRIBUTION, mDistribution);
         }
 
         startActivity(intent);
@@ -96,6 +101,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onModeSelected(Mode mode) {
         mMode = mode;
+    }
+
+    @Override
+    public void onDistributionChanged(int progress) {
+        mDistribution = progress;
     }
 
     @Override

@@ -89,15 +89,7 @@ public class RealJoystick extends Joystick {
                 try {
                     mOutputStream = mSocket.getOutputStream();
 
-                    /*
-                     * Send a couple of commands in order to clear the buffer. I found that when the
-                     * Arduino powers up, there is some residual bit in the channel. Perhaps, some
-                     * electrical energy that has not been unloaded. With this I send an LED
-                     * sequence command twice.
-                     */
-                    changeSequence();
-                    changeSequence();
-
+                    setMotorDistribution();
                 } catch (IOException e) {
                     showMessageToUser(R.string.bluetooth_not_connected);
                     closeSocket();
