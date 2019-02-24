@@ -7,15 +7,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
-import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.kerberosns.joystick.MainActivity;
 import com.kerberosns.joystick.R;
-import com.kerberosns.joystick.data.Mode;
 
 public class Settings extends Fragment {
     /**
@@ -23,9 +21,9 @@ public class Settings extends Fragment {
      */
     public interface Configurable {
         /**
-         * When the user selects a specific mode.
+         * When the user switches on or off the development mode.
          */
-        void onModeSelected(Mode mode);
+        void onModeSelected(boolean developmentMode);
 
         /**
          * When the user drags the seek bar.
@@ -44,9 +42,6 @@ public class Settings extends Fragment {
 
     private Configurable mListener;
 
-    /** Activity's context. */
-    private Context mContext;
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -56,8 +51,6 @@ public class Settings extends Fragment {
             String message = getResources().getString(R.string.implementation_exception);
             throw new ClassCastException(message);
         }
-
-        mContext = context;
     }
 
     @Override
@@ -66,55 +59,44 @@ public class Settings extends Fragment {
 
         View view = inflater.inflate(R.layout.settings, container, false);
 
-        Spinner spinner = view.findViewById(R.id.modes);
+        Switch devModeSwitch = view.findViewById(R.id.developmentModeSwitch);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter
-                .createFromResource(
-                        mContext,
-                        R.array.modes,
-                        R.layout.simple_spinner_item);
-
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String name = (String) adapterView.getItemAtPosition(i);
-                mListener.onModeSelected(Mode.valueOf(name));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
+        int distribution = 50;
 
         Bundle bundle = getArguments();
         if (bundle != null) {
-            String mode = bundle.getString(MainActivity.MODE);
-            if (mode != null) {
-                if (mode.equals(Mode.REAL.toString())) {
-                    spinner.setSelection(0);
-                } else {
-                    spinner.setSelection(1);
-                }
+            boolean developmentMode = bundle.getBoolean(MainActivity.MODE);
+            if (developmentMode) {
+                devModeSwitch.setChecked(true);
+            } else {
+                devModeSwitch.setChecked(false);
             }
+
+            distribution = bundle.getInt(MainActivity.DISTRIBUTION);
         }
 
-        final TextView distribution = view.findViewById(R.id.distributionTextView);
+        devModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mListener.onModeSelected(b);
+            }
+        });
 
-        SeekBar seekBar = view.findViewById(R.id.distributionSeekBar);
+        final TextView balance = view.findViewById(R.id.balance);
+
+        SeekBar seekBar = view.findViewById(R.id.powerDistributionSeekBar);
+        seekBar.setProgress(distribution);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mListener.onDistributionChanged(progress);
-                updateDistributionTextView(distribution, progress);
+                updateDistributionTextView(balance, progress);
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 mListener.onDistributionChanged(seekBar.getProgress());
-                updateDistributionTextView(distribution, seekBar.getProgress());
+                updateDistributionTextView(balance, seekBar.getProgress());
             }
 
             @Override
@@ -132,23 +114,31 @@ public class Settings extends Fragment {
 
         int length = left.length();
 
-        if (length == 1) {
-            text = "  " + left;
-        } else if (length == 2) {
-            text = " " + left;
-        } else {
-            text = left;
+        switch (length) {
+            case 1:
+                text = "  " + left;
+                break;
+            case 2:
+                text = " " + left;
+                break;
+            default:
+                text = left;
+                break;
         }
 
         text += " / ";
         length = right.length();
 
-        if (length == 1) {
-            text += "   " + right;
-        } else if (length == 2) {
-            text += "  " + right;
-        } else {
-            text += right;
+        switch (length) {
+            case 1:
+                text += "  " + right;
+                break;
+            case 2:
+                text += " " + right;
+                break;
+            default:
+                text += right;
+                break;
         }
 
         distribution.setText(text);

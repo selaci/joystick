@@ -16,7 +16,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.kerberosns.joystick.data.Mode;
 import com.kerberosns.joystick.fragments.Devices;
 import com.kerberosns.joystick.fragments.Settings;
 
@@ -27,7 +26,6 @@ public class MainActivity extends AppCompatActivity implements
      * A constant for debugging.
      */
     public static final String TAG = "JOYSTICK";
-
     public static final String MODE = "mode";
     public static final String DISTRIBUTION = "distribution";
 
@@ -42,9 +40,10 @@ public class MainActivity extends AppCompatActivity implements
     private final static int REQUEST_ENABLE_BLUETOOTH = 0;
 
     /**
-     * Default mode value.
+     * Default mode is not development, which means the application will try to crate bluetooth
+     * connections for real. If set to true then, no connection to the bluetooth device will occur.
      */
-    private Mode mMode = Mode.REAL;
+    private boolean mDevelopmentMode = false;
 
     /** The current power distribution. */
     private int mDistribution = 50;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBluetoothDeviceSelected(BluetoothDevice device) {
         Intent intent;
-        if (mMode.equals(Mode.TEST)) {
+        if (mDevelopmentMode) {
             intent = new Intent(getBaseContext(), TestJoystick.class);
         } else {
             intent = new Intent(getBaseContext(), RealJoystick.class);
@@ -99,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onModeSelected(Mode mode) {
-        mMode = mode;
+    public void onModeSelected(boolean developmentMode) {
+        mDevelopmentMode = developmentMode;
     }
 
     @Override
@@ -159,7 +158,8 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.nav_setup:
                 fragment = Settings.newInstance();
                 Bundle bundle = new Bundle();
-                bundle.putString(MODE, mMode.toString());
+                bundle.putBoolean(MODE, mDevelopmentMode);
+                bundle.putInt(DISTRIBUTION, mDistribution);
                 fragment.setArguments(bundle);
                 break;
             default:

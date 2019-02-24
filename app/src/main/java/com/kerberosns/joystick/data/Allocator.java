@@ -12,10 +12,10 @@ public class Allocator {
      * The size of the block the axis is divided by. For example of we had an axis with length one
      * hundred and the number of divisions is four then, mBlock will be twenty-five.
      */
-    private int mBlock;
+    private final int mBlock;
 
     /** The minor value in the axis. */
-    private int mMinor;
+    private final int mMinor;
 
     /**
      * Initialise the allocator.

@@ -47,13 +47,13 @@ public abstract class Joystick extends AppCompatActivity {
     private ImageView mHorizontalJoystick;
 
     /** The number of blocks each axis is divided by. */
-    private int mNumOfBlocks = 6;
+    private final int mNumOfBlocks = 6;
 
     /**
      * The block number that is in the middle of the axis. This is equivalent to not power.
      * It can be calculated programmatically, but I believe this is more explicit.
      */
-    private byte mNeutral = 3;
+    private final byte mNeutral = 3;
 
     /** It maps positions in the vertical axis to block numbers. */
     private Allocator mVerticalAllocator;
@@ -76,7 +76,7 @@ public abstract class Joystick extends AppCompatActivity {
     private int mDistribution;
 
     /** It encodes commands into bytes that can be transmitted over the serial channel. */
-    private Encoder mEncoder = new Encoder();
+    private final Encoder mEncoder = new Encoder();
 
     @SuppressLint("ClickableViewAccessibility")
     @Override

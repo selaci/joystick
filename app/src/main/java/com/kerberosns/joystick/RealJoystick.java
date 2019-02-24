@@ -50,7 +50,7 @@ public class RealJoystick extends Joystick {
     class ConnectToDeviceTask extends AsyncTask<BluetoothDevice, Void, BluetoothSocket> {
         private ProgressDialog mmDialog;
 
-        private Context mmContext;
+        private final Context mmContext;
 
         ConnectToDeviceTask(Context context) {
             mmContext = context;
