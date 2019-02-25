@@ -42,7 +42,11 @@
     <string name="item">Item</string>
     <string name="spinner">Spinner</string>
     <string name="power">Power</string>
-    <string name="balanced">100 / 100</string>
-
-    <string name="mode_primary">Development Mode</string>
+    <string name="development_mode">Development Mode</string>
+    <string name="divider">Divider</string>
+    <string name="distribution">Distribution</string>
+    <string name="balance">100 / 100</string>
+    <string name="data_sent">Data Send</string>
+    <string name="no_data_yet">No data yet</string>
+    <string name="data_received">Data Received</string>
 </resources>

@@ -1,15 +1,9 @@
-# Clear channel.
+# In Settings, Balance text field always defaults to 100 / 100
 
-This may be a bug in the code, caused by the initialization of certain variables at "-1".
-They should be "-3".
+If power distribution has been changed and we leave the settings fragment and go back again,
+the seek bar has the right setting but the balance text field is 100 / 100.
 
-- Implemented, but not tested.
-
-# Start rotating to the left.
-
-I may have a bug somewhere. It seems clearing the channel is not everything. At the first command,
-if I press at some point, instead of dragging the joystick and immediately release, sometimes the
-car keeps spinning.
+- Implemented, but not tested
 
 # Power distribution.
 
@@ -33,18 +27,3 @@ The list fragment seems to change the style when the screen changes from portrai
 # Settings , the state is not persisted during screen configuration changes
 
 I need to persist state information during screen orientation changes.
-
-# Screen orientation
-
-When the landscape mode is set, I do not save the state. Which makes the activity try to connect
-to the bluetooth device again. Since it already is connected, the attempt fails and closes the
-activity.
-
-- Implemented.
-
-# Attempts to reconnect to bluetooth device
-
-If you are in the joystick activity and press back, you go back to the list of devices. If you click
-on the device again, it does not re-connect. It keeps spinning and spinning.
-
-- Implemented
