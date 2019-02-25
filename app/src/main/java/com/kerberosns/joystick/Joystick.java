@@ -247,7 +247,7 @@ public abstract class Joystick extends AppCompatActivity {
             mSavedVerticalBlockNumber = blockNumber;
 
             if (!mHorizontalJoystickPressed) {
-                sendMoveCommand(blockNumber, mNeutral);
+                sendMoveCommand(mNeutral, blockNumber);
             }
         }
     }
@@ -257,7 +257,7 @@ public abstract class Joystick extends AppCompatActivity {
         byte blockNumber = mHorizontalAllocator.allocate(pos);
         if (mSavedHorizontalBlockNumber != blockNumber) {
             mSavedHorizontalBlockNumber = blockNumber;
-            sendMoveCommand(mNeutral, blockNumber);
+            sendMoveCommand(blockNumber, mNeutral);
         }
     }
 

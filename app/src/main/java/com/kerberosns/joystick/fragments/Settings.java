@@ -83,6 +83,7 @@ public class Settings extends Fragment {
         });
 
         final TextView balance = view.findViewById(R.id.balance);
+        updateDistributionTextView(balance, distribution);
 
         SeekBar seekBar = view.findViewById(R.id.powerDistributionSeekBar);
         seekBar.setProgress(distribution);
