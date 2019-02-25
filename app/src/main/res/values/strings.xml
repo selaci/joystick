@@ -46,7 +46,4 @@
     <string name="divider">Divider</string>
     <string name="distribution">Distribution</string>
     <string name="balance">100 / 100</string>
-    <string name="data_sent">Data Send</string>
-    <string name="no_data_yet">No data yet</string>
-    <string name="data_received">Data Received</string>
 </resources>
